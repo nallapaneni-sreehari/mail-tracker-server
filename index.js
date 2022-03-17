@@ -30,7 +30,7 @@ app.get('/:userEmail/:uniqueId/:ipAddress.jpg', (req,res)=>{
 });
 
 app.get('/getIpAddress', (req,res)=>{
-    var ip = req.headers['x-real-ip'] || req.connection.remoteAddress;
+    var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
     console.log("IP Address is::: ", ip);
 
