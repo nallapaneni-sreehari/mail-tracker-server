@@ -5,6 +5,9 @@ const bodyParser = require('body-parser');
 const requestIp = require('request-ip');
 const path = require('path');
 
+
+const PORT = process.env.PORT || 5004;
+
 app.use(bodyParser.json());
 app.use(cors());
 
@@ -34,7 +37,7 @@ app.get('/getIpAddress', (req,res)=>{
     res.status(201).send({message:"Ip fetched successfully!", ipAddress:ip});
 })
 
-app.listen(2001, (err)=>{
+app.listen(PORT, (err)=>{
     if(err) throw err;
-    console.log(`Server started on `, 2001);
+    console.log(`Server started on `, PORT);
 });
