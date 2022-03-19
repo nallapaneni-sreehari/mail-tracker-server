@@ -18,15 +18,14 @@ app.get('/', (req,res)=>{
 app.get('/:userEmail/:uniqueId/:ipAddress.jpg', (req,res)=>{
     console.log(`Params::: `, req.params);
     // res.sendFile(path.join(__dirname, "/image.jpg"));
-    var buf = new Buffer([
-        71,  73,  70,  56,  57,  97,  1,   0,   1,   0, 
-        128, 0,   0,   0,   0,   0,   0,   0,   0,   33, 
-        249, 4,   1,   0,   0,   0,   0,   44,  0,   0,
-        0,   0,   1,   0,   1,   0,   0,   2,   2,   68,  
-        1,   0,   59]);
+    var imgB64 = "R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=";
+    var bytes = Buffer.from(imgB64, 'base64');
+
+    console.log(`bytes ::: `, bytes);
     
+
     res.writeHead(200, {'Content-Type': 'image/gif' });
-    res.end(buf, 'binary');
+    res.end(bytes, 'binary');
 });
 
 app.get('/getIpAddress', (req,res)=>{
