@@ -17,6 +17,11 @@ app.get('/', (req,res)=>{
 
 app.get('/:userEmail/:uniqueId/:ipAddress.jpg', (req,res)=>{
     console.log(`Params::: `, req.params);
+
+    var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+    console.log("Tracking Ip Address ::: ", ip);
+
     // res.sendFile(path.join(__dirname, "/image.jpg"));
     var imgB64 = "R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=";
     var bytes = Buffer.from(imgB64, 'base64');
