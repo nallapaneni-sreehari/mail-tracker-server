@@ -15,7 +15,7 @@ app.get('/', (req,res)=>{
     console.log(`Req to Home ::: `, req.body);
 });
 
-app.get('/:userEmail/:uniqueId/:ipAddress.jpg', (req,res)=>{
+app.get('/:userEmail/:uniqueId/:ipAddress.png', (req,res)=>{
     console.log(`---------------------------------------------Tracking---------------------------------------`);
     
     console.log(`Params::: `, req.params);
@@ -24,6 +24,11 @@ app.get('/:userEmail/:uniqueId/:ipAddress.jpg', (req,res)=>{
 
     console.log("Tracking Ip Address ::: ", ip);
 
+    if(req.params.ipAddress != ip)
+    {
+        console.log(`Mail is Opened by Someone!`);
+        
+    }
     // res.sendFile(path.join(__dirname, "/img.gif"));
     // var imgB64 = "R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=";
     // var bytes = Buffer.from(imgB64, 'base64');
@@ -33,7 +38,9 @@ app.get('/:userEmail/:uniqueId/:ipAddress.jpg', (req,res)=>{
 
     // res.writeHead(200, {'Content-Type': 'image/gif' });
     // res.end(bytes, 'binary');
-    res.sendFile(path.join(__dirname, "/img.gif"));
+    res.sendFile(path.join(__dirname, "/img.png"));
+    console.log(`-----------------------------------------------------------------------`);
+    
 });
 
 app.get('/getIpAddress', (req,res)=>{
