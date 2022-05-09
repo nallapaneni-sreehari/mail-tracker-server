@@ -51,16 +51,16 @@ module.exports = class EmailService {
         }
         
         // console.log(`Email emailObj :: `, emailObj);
-        
+
         try 
         {
             var response = await emailModel.updateOne({uniqueId:this.params.uniqueId, sender:this.params?.userEmail},emailObj);
 
-            return response?.modifiedCount ?? false;
+            return emailObj;
 
         }
         catch (error) {
-            return false;
+            return null;
         }
     }
 }
