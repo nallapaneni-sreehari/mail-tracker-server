@@ -4,7 +4,8 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const requestIp = require('request-ip');
 const path = require('path');
-
+const db = require('./connections/mongodb');
+const sevices = require('./services/emailService');
 
 const PORT = process.env.PORT || 5004;
 
@@ -15,7 +16,7 @@ app.get('/', (req,res)=>{
     console.log(`Req to Home ::: `, req.body);
 });
 
-app.get('/:userEmail/:uniqueId/:ipAddress.png', (req,res)=>{
+app.get('/:userEmail/:uniqueId/:ipAddress.png', async (req,res)=>{
     console.log(`---------------------------------------------Tracking---------------------------------------`);
     
     console.log(`Params::: `, req.params);
@@ -27,20 +28,22 @@ app.get('/:userEmail/:uniqueId/:ipAddress.png', (req,res)=>{
     if(req.params.ipAddress != ip)
     {
         console.log(`Mail is Opened by Someone!`);
-        
+
+        try {
+            const emailService = new sevices(req, res);
+    
+            var result = await emailService.updateEmail();
+    
+            console.log(`result ::: `, result);
+            
+        } catch (error) {
+            console.log(`Error catch updateEmail ::: `, error);
+        }
     }
-    // res.sendFile(path.join(__dirname, "/img.gif"));
-    // var imgB64 = "R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=";
-    // var bytes = Buffer.from(imgB64, 'base64');
 
-    // console.log(`bytes ::: `, bytes);
-    
+    res.sendFile(path.join(__dirname, "/assets/img.png"));
 
-    // res.writeHead(200, {'Content-Type': 'image/gif' });
-    // res.end(bytes, 'binary');
-    res.sendFile(path.join(__dirname, "/img.png"));
     console.log(`-----------------------------------------------------------------------`);
-    
 });
 
 app.get('/getIpAddress', (req,res)=>{
@@ -51,7 +54,22 @@ app.get('/getIpAddress', (req,res)=>{
     res.status(201).send({message:"Ip fetched successfully!", ipAddress:ip});
 })
 
-app.listen(PORT, (err)=>{
+app.post('/saveEmail', async (req,res)=>{
+    try {
+        const emailService = new sevices(req, res);
+
+        var result = await emailService.saveEmail();
+
+        res.status(201).send({status:'success', message:'email created successfully', data:result});
+
+    } catch (error) {
+        console.log(`Error catch saveEmail ::: `, error);
+        res.status(500).send({status:'failed', message:'failed to save Email'});   
+    }
+});
+
+app.listen(PORT, async (err)=>{
     if(err) throw err;
+    await db.connect();
     console.log(`Server started on `, PORT);
 });
