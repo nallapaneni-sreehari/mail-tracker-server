@@ -19,7 +19,8 @@ module.exports = class EmailService {
             sentAt : this.req.body?.sentAt,
             uniqueId : this.req.body?.id,
             emailBody : this.req.body?.body,
-            emailSubject : this.req.body?.subject
+            emailSubject : this.req.body?.subject,
+            status: this.req.body?.toAddress?.length <= 0 ? 'sent' : 'delivered'
         };
 
         console.log(`emailObj ::: `, emailObj);
