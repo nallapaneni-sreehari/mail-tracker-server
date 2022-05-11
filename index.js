@@ -113,7 +113,7 @@ app.post('/updateMailOnSent/:userEmail/:uniqueId', async (req,res)=>{
 
         result.messageId = req.body?.messageId;
 
-        result.status = req.body?.status;
+        result.status = (result[0]?.receiver?.length>0 && result[0]?.receiver[0]?.name && result[0]?.receiver[0]?.name !='') ? req.body?.status : 'delivered';
 
         result.save();
         

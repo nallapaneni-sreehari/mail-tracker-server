@@ -11,7 +11,7 @@ module.exports = class EmailService {
     async saveEmail()
     {
         console.log(`Email Details :: `, this.req?.body);
-        
+        var status;
         var emailObj = 
         {
             sender : this.req.body?.user,
@@ -19,8 +19,7 @@ module.exports = class EmailService {
             sentAt : this.req.body?.sentAt,
             uniqueId : this.req.body?.id,
             emailBody : this.req.body?.body,
-            emailSubject : this.req.body?.subject,
-            status: this.req.body?.toAddress?.length <= 0 ? 'sent' : 'delivered'
+            emailSubject : this.req.body?.subject
         };
 
         console.log(`emailObj ::: `, emailObj);
