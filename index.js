@@ -30,8 +30,9 @@ const PORT = process.env.PORT || 5004;
 app.use(bodyParser.json());
 app.use(cors());
 
-app.get('/', (req,res)=>{
-    console.log(`Req to Home ::: `, req.body);
+app.get('/getHealth', (req,res)=>{
+    console.log(`Health Checking...`);
+    res.status(200).send({status:'success',message:'Server is up and running'});
 });
 
 app.get('/:userEmail/:uniqueId/:ipAddress.png', async (req,res)=>{
@@ -85,6 +86,40 @@ app.post('/saveEmail', async (req,res)=>{
     } catch (error) {
         console.log(`Error catch saveEmail ::: `, error);
         res.status(500).send({status:'failed', message:'failed to save Email'});   
+    }
+});
+
+app.get('/getAllMails/:email', async (req,res)=>{
+    console.log(`Getting All Mails ::: `, req.params);
+    try {
+        
+        const emailService = new sevices(req, res);
+
+        var result = await emailService.getAllEmails();
+
+        res.status(200).send({status:'success', message:'successfully fetched data', data:result});
+    } catch (error) {
+        res.status(500).send({status:'failed', message:'failed to fetch all mails'});
+    }
+});
+
+app.post('/updateMailOnSent/:userEmail/:uniqueId', async (req,res)=>{
+    console.log(`Mail sent Updating ::: `, req.body, req.params);
+    
+    try {
+        const emailService = new sevices(req, res);
+
+        var result = await emailService.findMail();
+
+        result.messageId = req.body?.messageId;
+
+        result.status = req.body?.status;
+
+        result.save();
+        
+        res.status(200).send({status:'success',message:'mail updated successfully'});
+    } catch (error) {
+        console.log(`Error catch updateEmail when sent ::: `, error);
     }
 });
 

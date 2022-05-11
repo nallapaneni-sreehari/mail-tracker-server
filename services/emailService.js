@@ -63,4 +63,31 @@ module.exports = class EmailService {
             return null;
         }
     }
+
+    async getAllEmails()
+    {
+        const email = this.params.email;
+        const skip = this.params.skip ?? 0;
+        const limit = 10;
+        try {
+
+            var count = await emailModel.count({sender:email});
+
+            var response = await emailModel.find({sender:email}).skip(skip).limit(limit);
+
+            return {response,count};
+
+        } catch (error) {
+            return null;
+        }
+    }
+
+    async findMail()
+    {
+        try {
+            return await emailModel.findOne({uniqueId:this.params.uniqueId, sender:this.params?.userEmail});
+        } catch (error) {
+            return null;
+        }
+    }
 }

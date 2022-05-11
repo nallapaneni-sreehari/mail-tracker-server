@@ -13,9 +13,23 @@ const emailSchema = new mongoose.Schema({
         type:Date,
         required:true
     },
+    status:{
+        type:String,
+        required:true,
+        default:'sent'
+    },
+    messageId:{
+        type:String,
+        required:false
+    },
     openedAt:{
         type:Date,
         required:false
+    },
+    lastOpenedAt:{
+        type:Date,
+        required:false,
+        default:Date.now()
     },
     openedBy:{
         type:String,
