@@ -111,9 +111,12 @@ app.post('/updateMailOnSent/:userEmail/:uniqueId', async (req,res)=>{
 
         var result = await emailService.findMail();
 
+        console.log(`result :::::: `, result);
+        
+
         result.messageId = req.body?.messageId;
 
-        result.status = (result[0]?.receiver?.length>0 && result[0]?.receiver[0]?.name && result[0]?.receiver[0]?.name !='') ? req.body?.status : 'delivered';
+        result.status = (result?.receiver?.length>0 && result?.receiver[0]?.name && result?.receiver[0]?.name !='') ? req.body?.status : 'delivered';
 
         result.save();
         
