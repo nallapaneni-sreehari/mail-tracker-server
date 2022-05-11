@@ -90,4 +90,19 @@ module.exports = class EmailService {
             return null;
         }
     }
+
+    async getSummary()
+    {
+        try {
+            var sent = await emailModel.count({sender:this.params?.userEmail, status:'sent'});
+            var delivered = await emailModel.count({sender:this.params?.userEmail, status:'delivered'});
+            var opened = await emailModel.count({sender:this.params?.userEmail, openedAt:{ "$exists": true }});
+            var notOpened = await emailModel.count({sender:this.params?.userEmail, openedAt:{ "$exists": false }});
+            
+            return{sent, delivered, opened, notOpened};
+            
+        } catch (error) {
+            return null;
+        }
+    }
 }

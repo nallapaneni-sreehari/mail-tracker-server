@@ -123,6 +123,22 @@ app.post('/updateMailOnSent/:userEmail/:uniqueId', async (req,res)=>{
     }
 });
 
+app.get('/getSummary/:userEmail',async (req, res)=>{
+    console.log(`Get Summary ::: `, req.body, req.params);
+
+    try {
+        const emailService = new sevices(req, res);
+
+        var result = await emailService.getSummary();
+
+        res.status(200).send({status:'success',message:'summary details fetched successfully', data:result});
+    } catch (error) {
+        res.status(500).send({status:'failed',message:'failed to fetch summary details', data:result});
+
+    }
+    
+});
+
 http.listen(PORT, async (err)=>{
     if(err) throw err;
     await db.connect();
