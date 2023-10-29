@@ -73,7 +73,7 @@ app.get('/getIpAddress', (req,res)=>{
     console.log("IP Address is::: ", ip);
 
     res.status(201).send({message:"Ip fetched successfully!", ipAddress:ip});
-})
+});
 
 app.post('/saveEmail', async (req,res)=>{
     try {
