@@ -73,9 +73,9 @@ app.get('/getIpAddress', async (req,res)=>{
 
     console.log("IP Address is::: ", ip);
     // console.log("process.env.MONGODB_URI::: ", process.env.MONGODB_URI);
-    let res = await mongoose.connection.db.collection('emails').find({}).toArray();
+    let resIp = await mongoose.connection.db.collection('emails').find({}).toArray();
 
-    res.status(201).send({message:"Ip fetched successfully!", ipAddress:ip, data: res});
+    res.status(201).send({message:"Ip fetched successfully!", ipAddress:ip, data: resIp});
 });
 
 app.post('/saveEmail', async (req,res)=>{
