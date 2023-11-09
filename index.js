@@ -21,7 +21,7 @@ const io = require('socket.io')(http, {
 var mySocket;
 
 io.on('connection', socket=>{
-    console.log(`Connection to server is made !`);
+    console.log(`Socket connection to server is made !`);
     
     mySocket = socket;
 })
@@ -72,7 +72,7 @@ app.get('/getIpAddress', async (req,res)=>{
     var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
     console.log("IP Address is::: ", ip);
-    console.log("mongoose.connection::: ", mongoose.connection);
+    // console.log("mongoose.connection::: ", mongoose.connection.db);
     // console.log("process.env.MONGODB_URI::: ", process.env.MONGODB_URI);
     let resIp = await mongoose.connection.db.collection('emails').find({}).toArray();
 
