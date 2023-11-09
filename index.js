@@ -71,6 +71,7 @@ app.get('/getIpAddress', (req,res)=>{
     var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
     console.log("IP Address is::: ", ip);
+    console.log("process.env.MONGODB_URI::: ", process.env.MONGODB_URI);
 
     res.status(201).send({message:"Ip fetched successfully!", ipAddress:ip});
 });
