@@ -7,6 +7,7 @@ const path = require('path');
 const db = require('./connections/mongodb');
 const sevices = require('./services/emailService');
 const socket = require('socket.io');
+const mongoose = require('mongoose');
 
 const http = require('http').Server(app);
 const io = require('socket.io')(http, {
@@ -67,13 +68,14 @@ app.get('/:userEmail/:uniqueId/:ipAddress.png', async (req,res)=>{
     console.log(`-----------------------------------------------------------------------`);
 });
 
-app.get('/getIpAddress', (req,res)=>{
+app.get('/getIpAddress', async (req,res)=>{
     var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
     console.log("IP Address is::: ", ip);
-    console.log("process.env.MONGODB_URI::: ", process.env.MONGODB_URI);
+    // console.log("process.env.MONGODB_URI::: ", process.env.MONGODB_URI);
+    let res = await mongoose.connection.db.collection('emails').find({}).toArray();
 
-    res.status(201).send({message:"Ip fetched successfully!", ipAddress:ip});
+    res.status(201).send({message:"Ip fetched successfully!", ipAddress:ip, data: res});
 });
 
 app.post('/saveEmail', async (req,res)=>{
