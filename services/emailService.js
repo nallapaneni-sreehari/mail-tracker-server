@@ -73,7 +73,7 @@ module.exports = class EmailService {
 
             var count = await emailModel.count({sender:email});
 
-            var response = await emailModel.find({sender:email}).skip(skip).limit(limit);
+            var response = await emailModel.find({sender:email}).skip(skip).limit(limit).sort({_id: -1});
 
             return {response,count};
 

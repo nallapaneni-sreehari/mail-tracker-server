@@ -12,7 +12,7 @@ const mongoose = require('mongoose');
 const http = require('http').Server(app);
 const io = require('socket.io')(http, {
     cors: {
-      origin: 'chrome-extension://',
+      origin: '*',
       credentials: true,
       allowEIO3: true
     }
@@ -62,7 +62,13 @@ app.get('/:userEmail/:uniqueId/:ipAddress.png', async (req,res)=>{
             console.log(`Error catch updateEmail ::: `, error);
         }
     }
-
+    res.set({
+        'Content-Type': 'image/png',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+    });
+    
     res.sendFile(path.join(__dirname, "/assets/img.png"));
 
     console.log(`-----------------------------------------------------------------------`);
