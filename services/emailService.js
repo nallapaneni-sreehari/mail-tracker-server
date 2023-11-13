@@ -77,9 +77,10 @@ module.exports = class EmailService {
             query['status'] = body.selectFilter;
         if(body.searchFilter)
             query['emailSubject'] = {$regex: body.searchFilter, $options: 'i'};
-        if(body.fromDate && body.toDate)
-            query['fromDate'] = body.fromDate;
-            query['toDate'] = body.toDate;
+        if (body.fromDate && body.toDate) {
+            query['sentAt'] = { $gte: new Date(body.fromDate) };
+            query['sentAt'] = { $lte: new Date(body.toDate) };
+        }
         console.log(`query :: `, query);
         try {
 
@@ -113,6 +114,62 @@ module.exports = class EmailService {
             
             return{sent, delivered, opened, notOpened};
             
+        } catch (error) {
+            return null;
+        }
+    }
+
+    async getSummaryForGraph()
+    {
+        let { userEmail, countOf, year=2022 } = this.params;
+
+        let query = [
+            {$match: {sender: userEmail}},
+            {
+                $group: {
+                    _id: {
+                        year: { $year: "$sentAt" },
+                        month: { $month: "$sentAt" }
+                    },
+                    total: {
+                        $sum: {
+                            $cond: {
+                                if: { $eq: ["$status", countOf] },
+                                then: 1,
+                                else: 0
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    month: "$_id.month",
+                    year: "$_id.year",
+                    total: "$total"
+                }
+            },
+            { $match: { year: year } }
+        ];
+
+        try {
+            var count = await emailModel.aggregate(query);
+            console.log(`Total :: `, count);
+            return count;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    async saveNotificationSettings(){
+        try {
+            let body = this.req.body;
+            let update = {};
+            update[`notificationSettings.${body.mode}`] = body.enabled ? 'enabled' : 'disabled';
+
+            let result = await emailModel.updateOne({sender: email}, {$set: update});
+            return result
         } catch (error) {
             return null;
         }

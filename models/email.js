@@ -61,6 +61,13 @@ const emailSchema = new mongoose.Schema({
         required:false,
         default:0
     },
+    notificationSettings: {
+        type: Object, default: {
+            desktop: 'enabled',
+            whatsapp: 'disabled',
+            sms: 'disabled',
+        }
+    }
 });
 
 module.exports = mongoose.model('emails', emailSchema);
