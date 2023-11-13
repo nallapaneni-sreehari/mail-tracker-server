@@ -99,7 +99,7 @@ app.post('/saveEmail', async (req,res)=>{
     }
 });
 
-app.get('/getAllMails/:email', async (req,res)=>{
+app.post('/getAllMails/:email', async (req,res)=>{
     console.log(`Getting All Mails ::: `, req.params);
     try {
         

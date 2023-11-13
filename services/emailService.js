@@ -46,6 +46,7 @@ module.exports = class EmailService {
         if(emailObj && Object.keys(emailObj)?.length > 0)
         {
             emailObj['openedAt'] = Date.now();
+            emailObj['status'] = 'viewed';
             emailObj['openedBy'] = emailObj['receiver']?.[0]?.name ?? '';
             emailObj.openedTimes = emailObj.openedTimes+1;
         }
@@ -66,14 +67,25 @@ module.exports = class EmailService {
 
     async getAllEmails()
     {
+        const body = this.req.body;
+        console.log(`body :: `, body);
         const email = this.params.email;
         const skip = this.params.skip ?? 0;
-        const limit = 10;
+        const limit = 100;
+        let query = { sender: email };
+        if(body.selectFilter && body.selectFilter.toLowerCase() != "all")
+            query['status'] = body.selectFilter;
+        if(body.searchFilter)
+            query['emailSubject'] = {$regex: body.searchFilter, $options: 'i'};
+        if(body.fromDate && body.toDate)
+            query['fromDate'] = body.fromDate;
+            query['toDate'] = body.toDate;
+        console.log(`query :: `, query);
         try {
 
-            var count = await emailModel.count({sender:email});
+            var count = await emailModel.count(query);
 
-            var response = await emailModel.find({sender:email}).skip(skip).limit(limit).sort({_id: -1});
+            var response = await emailModel.find(query).skip(skip).limit(limit).sort({_id: -1});
 
             return {response,count};
 
