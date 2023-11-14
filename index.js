@@ -30,6 +30,11 @@ const PORT = process.env.PORT || 5004;
 
 app.use(bodyParser.json());
 app.use(cors());
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    // Add other necessary headers here
+    next();
+});
 
 app.get('/getHealth', (req,res)=>{
     console.log(`Health Checking...`);
@@ -45,7 +50,7 @@ app.get('/:userEmail/:uniqueId/:ipAddress.png', async (req,res)=>{
 
     console.log("Tracking Ip Address ::: ", ip);
 
-    if(req.params.ipAddress != ip)
+    if(req.params.ipAddress != ip) //Compare IPs if same, means that sender only opened the mail
     {
         console.log(`Mail is Opened by Someone!`);
 
@@ -80,9 +85,9 @@ app.get('/getIpAddress', async (req,res)=>{
     console.log("IP Address is::: ", ip);
     // console.log("mongoose.connection::: ", mongoose.connection.db);
     // console.log("process.env.MONGODB_URI::: ", process.env.MONGODB_URI);
-    let resIp = await mongoose.connection.db.collection('emails').find({}).toArray();
+    // let resIp = await mongoose.connection.db.collection('emails').find({}).toArray();
 
-    res.status(201).send({message:"Ip fetched successfully!", ipAddress:ip, data: resIp});
+    res.status(201).send({message:"Ip fetched successfully!", ipAddress:ip});
 });
 
 app.post('/saveEmail', async (req,res)=>{
@@ -159,6 +164,22 @@ app.get('/getSummaryForGraph/:userEmail/:countOf',async (req, res)=>{
         const emailService = new sevices(req, res);
 
         var result = await emailService.getSummaryForGraph();
+
+        res.status(200).send({status:'success',message:'summary details fetched successfully', data:result});
+    } catch (error) {
+        res.status(500).send({status:'failed',message:'failed to fetch summary details', data:result});
+
+    }
+    
+});
+
+app.get('/getSummaryForGeoMap/:userEmail/:countOf',async (req, res)=>{
+    console.log(`Get Summary ::: `, req.body, req.params);
+
+    try {
+        const emailService = new sevices(req, res);
+
+        var result = await emailService.getSummaryCountryWise();
 
         res.status(200).send({status:'success',message:'summary details fetched successfully', data:result});
     } catch (error) {

@@ -67,6 +67,10 @@ const emailSchema = new mongoose.Schema({
             whatsapp: 'disabled',
             sms: 'disabled',
         }
+    },
+    geoInfo: {
+        type: Object,
+        default: {}
     }
 });
 

@@ -1,4 +1,5 @@
 const emailModel = require('../models/email');
+const { ipToGeo, getIpAddress } = require('../utils/geo');
 
 module.exports = class EmailService {
     constructor(req, res)
@@ -12,7 +13,7 @@ module.exports = class EmailService {
     {
         console.log(`Email Details :: `, this.req?.body);
         var status;
-        var emailObj = 
+        let emailObj = 
         {
             sender : this.req.body?.user,
             receiver : this.req.body?.toAddress,
@@ -39,14 +40,23 @@ module.exports = class EmailService {
     {
         console.log(`Email Details :: `, this.params);
         
+        var ip = await getIpAddress();
+        ip = ip.replace(/\n/g, ""); //Replace \n
+        var geoInfo = await ipToGeo(ip);
+        
         var emailObj = await emailModel.findOne({uniqueId:this.params.uniqueId, sender:this.params?.userEmail});
 
         // console.log(`Before emailObj :: `, emailObj);
 
         if(emailObj && Object.keys(emailObj)?.length > 0)
         {
+            let geo = {};
+            geo[ip] = geoInfo;
+
             emailObj['openedAt'] = Date.now();
             emailObj['status'] = 'viewed';
+            emailObj['geoInfo'] = {...emailObj['geoInfo'], ...geo};
+
             emailObj['openedBy'] = emailObj['receiver']?.[0]?.name ?? '';
             emailObj.openedTimes = emailObj.openedTimes+1;
         }
@@ -55,8 +65,8 @@ module.exports = class EmailService {
 
         try 
         {
-            var response = await emailModel.updateOne({uniqueId:this.params.uniqueId, sender:this.params?.userEmail},emailObj);
-
+            // var response = await emailModel.updateOne({uniqueId:this.params.uniqueId, sender:this.params?.userEmail},emailObj);
+            emailObj.save();
             return emailObj;
 
         }
@@ -109,7 +119,8 @@ module.exports = class EmailService {
         try {
             var sent = await emailModel.count({sender:this.params?.userEmail, status:'sent'});
             var delivered = await emailModel.count({sender:this.params?.userEmail, status:'delivered'});
-            var opened = await emailModel.count({sender:this.params?.userEmail, openedAt:{ "$exists": true }});
+            // var opened = await emailModel.count({sender:this.params?.userEmail, openedAt:{ "$exists": true }});
+            var opened = await emailModel.count({ sender: this.params?.userEmail, status: 'viewed' });
             var notOpened = await emailModel.count({sender:this.params?.userEmail, openedAt:{ "$exists": false }});
             
             return{sent, delivered, opened, notOpened};
@@ -121,7 +132,7 @@ module.exports = class EmailService {
 
     async getSummaryForGraph()
     {
-        let { userEmail, countOf, year=2022 } = this.params;
+        let { userEmail, countOf, year=2023 } = this.params;
 
         let query = [
             {$match: {sender: userEmail}},
@@ -154,8 +165,64 @@ module.exports = class EmailService {
         ];
 
         try {
+            // console.log(`query :: `, JSON.stringify(query));
             var count = await emailModel.aggregate(query);
             console.log(`Total :: `, count);
+            return count;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    async getSummaryCountryWise()
+    {
+        let { userEmail, countOf, year=2023 } = this.params;
+
+        let query = [
+            { $match: { sender: userEmail } },
+            {
+                $addFields: {
+                    geoInfoArray: { $objectToArray: "$geoInfo" } // Convert geoInfo to an array
+                }
+            },
+            { $unwind: "$geoInfoArray" },
+            {
+                $group: {
+                    _id: "$geoInfoArray.v.country",
+                    sent: {
+                        $sum: {
+                            $cond: {
+                                if: { $in: ["$status", ["sent", "delivered", "viewed"]] },
+                                then: 1,
+                                else: 0
+                            }
+                        }
+                    },
+                    viewed: {
+                        $sum: {
+                            $cond: {
+                                if: { $eq: ["$status", "viewed"] },
+                                then: 1,
+                                else: 0
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 1,
+                    //       Country: "$_id.country",
+                    sent: "$sent",
+                    viewed: "$viewed"
+                }
+            }
+        ];
+
+        try {
+            // console.log(`query :: `, JSON.stringify(query));
+            var count = await emailModel.aggregate(query);
+            console.log(`Total getSummaryCountryWise:: `, count);
             return count;
         } catch (error) {
             return null;
