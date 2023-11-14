@@ -117,8 +117,8 @@ module.exports = class EmailService {
     async getSummary()
     {
         try {
-            var sent = await emailModel.count({sender:this.params?.userEmail, status:'sent'});
-            var delivered = await emailModel.count({sender:this.params?.userEmail, status:'delivered'});
+            var sent = await emailModel.count({sender:this.params?.userEmail, status: {$in: ['sent','delivered', 'viewed']}});
+            var delivered = await emailModel.count({sender:this.params?.userEmail, status: {$in: ['delivered', 'viewed']}});
             // var opened = await emailModel.count({sender:this.params?.userEmail, openedAt:{ "$exists": true }});
             var opened = await emailModel.count({ sender: this.params?.userEmail, status: 'viewed' });
             var notOpened = await emailModel.count({sender:this.params?.userEmail, openedAt:{ "$exists": false }});
@@ -133,7 +133,7 @@ module.exports = class EmailService {
     async getSummaryForGraph()
     {
         let { userEmail, countOf, year=2023 } = this.params;
-
+        countOf = countOf == "delivered" ? ["viewed", "delivered"] : countOf == "sent" ? ["sent", "delivered", "viewed"] : [countOf];
         let query = [
             {$match: {sender: userEmail}},
             {
@@ -145,7 +145,7 @@ module.exports = class EmailService {
                     total: {
                         $sum: {
                             $cond: {
-                                if: { $eq: ["$status", countOf] },
+                                if: { $in: ["$status", countOf] },
                                 then: 1,
                                 else: 0
                             }
