@@ -7,9 +7,13 @@ const path = require('path');
 const db = require('./connections/mongodb');
 const sevices = require('./services/emailService');
 const socket = require('socket.io');
+const fs = require('fs');
 const mongoose = require('mongoose');
-
-const http = require('http').Server(app);
+const options = {
+  key: fs.readFileSync('/etc/letsencrypt/live/mail-tracker-server.duckdns.org/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/mail-tracker-server.duckdns.org/fullchain.pem'),
+};
+const http = require('https').createServer(options, app);
 const io = require('socket.io')(http, {
     cors: {
       origin: '*',
@@ -26,7 +30,7 @@ io.on('connection', socket=>{
     mySocket = socket;
 })
 
-const PORT = process.env.PORT || 5004;
+const PORT = process.env.PORT || 443;
 
 app.use(bodyParser.json());
 app.use(cors());
