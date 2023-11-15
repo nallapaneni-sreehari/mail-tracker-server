@@ -1,4 +1,5 @@
 const emailModel = require('../models/email');
+const notificationModel = require('../models/notifications');
 const { ipToGeo, getIpAddress } = require('../utils/geo');
 
 module.exports = class EmailService {
@@ -40,8 +41,8 @@ module.exports = class EmailService {
     {
         console.log(`Email Details :: `, this.params);
         
-        var ip = await getIpAddress();
-        ip = ip.replace(/\n/g, ""); //Replace \n
+        var ip = this.params.ipAddress;
+        // ip = ip.replace(/\n/g, ""); //Replace \n
         var geoInfo = await ipToGeo(ip);
         
         var emailObj = await emailModel.findOne({uniqueId:this.params.uniqueId, sender:this.params?.userEmail});
@@ -229,15 +230,30 @@ module.exports = class EmailService {
         }
     }
 
-    async saveNotificationSettings(){
+    async saveNotificationSettings() {
         try {
             let body = this.req.body;
-            let update = {};
-            update[`notificationSettings.${body.mode}`] = body.enabled ? 'enabled' : 'disabled';
-
-            let result = await emailModel.updateOne({sender: email}, {$set: update});
-            return result
+            // let result = await emailModel.updateOne({sender: email}, {$set: update});
+            let response = {};
+            let result = await notificationModel.findOne({ email: body.email });
+            if (result) {
+                result[body.mode] = body.enabled;
+                if (body.value)
+                    result['mobile'] = body.value;
+                await result.save();
+                response = result;
+            }
+            else {
+                let notification = {};
+                notification[body.mode] = body.enabled;
+                if (body.value)
+                    notification['mobile'] = body.value;
+                response = new notificationModel(notification);
+                response = response.save();
+            }
+            return response
         } catch (error) {
+            console.log(`E : `, error);
             return null;
         }
     }
