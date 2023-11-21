@@ -41,7 +41,10 @@ module.exports = class EmailService {
     {
         console.log(`Email Details :: `, this.params);
         
-        var ip = this.params.ipAddress;
+        // var ip = this.params.ipAddress;
+        let ip = this.req.ip || this.req.connection.remoteAddress;
+        // const ip = this.req.ipInfo.ip;
+        console.log(`ip ::::: `, ip);
         // ip = ip.replace(/\n/g, ""); //Replace \n
         var geoInfo = await ipToGeo(ip);
         

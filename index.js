@@ -8,6 +8,9 @@ const db = require('./connections/mongodb');
 const sevices = require('./services/emailService');
 const socket = require('socket.io');
 const fs = require('fs');
+const expressIP = require('express-ip');
+const trustproxy = require('trustproxy');
+
 const mongoose = require('mongoose');
 const options = {
   key: fs.readFileSync('/etc/letsencrypt/live/mail-tracker-server.duckdns.org/privkey.pem'),
@@ -32,6 +35,25 @@ io.on('connection', socket=>{
 
 const PORT = process.env.PORT || 443;
 
+// app.use(expressIP().getIpInfoMiddleware);
+// app.set('trust proxy', true);
+// app.set('trust proxy', trustproxy(['loopback', 'linklocal', 'uniquelocal']));
+app.set('trust proxy', true);
+
+app.use((req, res, next)=>{
+    console.log(`Custome Header :: `, req?.clnti, req?.clientIp);
+    
+    // const flatted = require('flatted');
+    // console.log(`HEAD ::: `, flatted.toJSON(req));
+    // // console.log(`Headers all ::: `, req);
+    // let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    // console.log('Header IP :: ', ip);
+    // console.log(`req.headers['x-forwarded-for'] :: `, req.headers['x-forwarded-for']);
+    // console.log(`req.connection.remoteAddress; :: `, req.connection.remoteAddress);
+    // req.ipAddr = ip;
+    next();
+});
+
 app.use(bodyParser.json());
 app.use(cors());
 app.use((req, res, next) => {
@@ -41,8 +63,8 @@ app.use((req, res, next) => {
 });
 
 app.get('/getHealth', (req,res)=>{
-    console.log(`Health Checking...`);
-    res.status(200).send({status:'success',message:'Server is up and running'});
+    // console.log(`Health Checking...`, req.ipInfo);
+    res.status(200).send({status:'success',message:'Server is up and running', requestedIp: req.ipAddr});
 });
 
 app.get('/:userEmail/:uniqueId/:ipAddress.png', async (req,res)=>{
