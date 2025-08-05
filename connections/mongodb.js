@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 async function connect() {
-    const connectionUrl = process.env.MONGODB_URI || "mongodb+srv://r151149:sree123@cluster0.ecexy.mongodb.net/track-the-mail-db?retryWrites=true&w=majority";
+    const connectionUrl = process.env.MONGODB_URI || "mongodb+srv://r151149:r151149@cluster0.ecexy.mongodb.net/track-the-mail-db?retryWrites=true&w=majority";
 
     console.log('connectionUrl  :: ', connectionUrl);
     return new Promise((resolve, reject)=>{
